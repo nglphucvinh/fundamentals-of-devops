@@ -80,3 +80,7 @@ Changes to Outputs:
         "3.141.166.80",
     ]
 ```
+3. Make your ec2-instance module more configurable: e.g., add input variables for the instance type, AMI name, and so on.
+--> Check the varialbes.tf
+4. Learn how to version your modules. 
+--> Using git tag, updated in main.tf
