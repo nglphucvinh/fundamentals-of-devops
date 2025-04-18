@@ -1,0 +1,7 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - ap-southeast-2
+aws_profile: hakuna-mgmt-admin
+keyed_groups:
+  - key: tags.Ansible 
+leading_separator: '' 
