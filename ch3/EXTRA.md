@@ -50,3 +50,10 @@ sudo systemctl reload nginx
 ```
 You will see the new instance got served by nginx, jmeter test result below
 ![result](nginx-jmeter.png "Title")
+### VM Orchestration
+1. Having the ASG deploy the latest AMI is convenient for testing and development, but in production, you typically want to be able to specify the exact AMI version to deploy, so you don’t roll out new code unintentionally. Update the Packer template to add an input variable that lets you specify a version number, and include that version number in the AMI name. Now you can set the ami_name input variable in the asg module to the exact AMI you want to deploy.
+--> Created file `sample-app-extra.pkr.hcl for this requirement`, in main.tf, update the `ami_name` input
+2. Scale the number of instances in the ASG from three to four. How does this compare to the server orchestration example?
+--> Changing min instance from 3 to 4
+--> With ASG, everything is more automated, faster, less risk (roll-back setting, healthcheck), by running `tofu apply`, comparing to runinng multiple command line to create new instance, configure, and update nginx.
+3. Try terminating one of the instances using the AWS Console. How does the ALB handle it? What about the ASG?
