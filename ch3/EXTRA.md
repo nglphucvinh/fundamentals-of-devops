@@ -58,3 +58,19 @@ You will see the new instance got served by nginx, jmeter test result below
 --> With ASG, everything is more automated, faster, less risk (roll-back setting, healthcheck), by running `tofu apply`, comparing to runinng multiple command line to create new instance, configure, and update nginx.
 3. Try terminating one of the instances using the AWS Console. How does the ALB handle it? What about the ASG?
 --> We got 502 and 504 error codes, the ALB will then notice then unhealthy instance and route the requests to the healthy ones, then no error codes, the ASG will detect then number of instance is fewer than the desired min capacity, it will automatically launch a new replacement (around 1 minute after the instance is terminated), the new instance will be launch fron the same template (AMI, configuration), so it is guaranteed to be the same as the existing instances, once the instance is fully initialized, it will register with the ALB, the ALB will then perform healthcheck, once the health checks pass, the ALB starts routing traffic to the new instance, now traffic is distributed across all available instances.
+### Container Orchestration
+1. I’m using YAML in these examples to avoid introducing extra tools, but raw YAML is not a great choice for production, as it doesn’t support variables, templating, for-loops, conditionals, and other programming language features that allow for code reuse. In production, you may instead want to try tools such as Helm, OpenTofu with the Kubernetes provider, or Kustomize (full list).
+--> Install Helm, then create a helm folder and sample helm chart with
+```
+cd helm && helm create sample-app
+```
+--> Modify the values.yml and template files based on the information in sample-app-deployment.yml and sample-app-service.yml
+--> Remove existing pods and services, else helm will not run due to
+```
+Error: INSTALLATION FAILED: Unable to continue with install: Service "sample-app-loadbalancer" in namespace "default" exists and cannot be imported into the current release: invalid ownership metadata; label validation error: missing key "app.kubernetes.io/managed-by": must be set to "Helm"; annotation validation error: missing key "meta.helm.sh/release-name": must be set to "my-app"; annotation validation error: missing key "meta.helm.sh/release-namespace": must be set to "default"
+```
+--> Install pods & services with Helm, 
+```
+helm install my-app ./sample-app
+```
+--> Note that the service selector needs to match the labels on the pods, else they won't connect.
