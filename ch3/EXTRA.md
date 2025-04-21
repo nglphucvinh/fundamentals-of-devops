@@ -71,6 +71,107 @@ Error: INSTALLATION FAILED: Unable to continue with install: Service "sample-app
 ```
 --> Install pods & services with Helm, 
 ```
-helm install my-app ./sample-app
+helm install sample-app ./sample-app
 ```
---> Note that the service selector needs to match the labels on the pods, else they won't connect.
+--> Note that the service selector needs to match the labels on the pods, else they won't connect. If can curl, everything is fine
+```
+curl http://localhost
+```
+--> After finish everything, uninstall the app
+```
+helm uninstall sample-app
+```
+NOTE: to allow "Use containerd for pulling and storing images," for new version of Docker Desktop, modify the Docker Engine and add the feature
+```
+{
+  "features": {
+    "containerd-snapshotter": true
+  },
+  "builder": {
+    "gc": {
+      "defaultKeepStorage": "20GB",
+      "enabled": true
+    }
+  },
+  "experimental": false
+}
+```
+2. By default, if you deploy a Kubernetes Service of type LoadBalancer into EKS, EKS will create a Classic Load Balancer, which is an older type of load balancer that is not generally recommended anymore. Follow the AWS documentation to deploy an ALB instead.
+--> Identify VPC ID and subnets
+```
+aws eks describe-cluster --name eks-sample --query "cluster.resourcesVpcConfig" --output text
+vpc-6597970d
+```
+--> Follow the https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
+--> After create the OIDC, proceed to create iamservice account per documentation https://docs.aws.amazon.com/eks/latest/userguide/lbc-helm.html
+```
+eksctl create iamserviceaccount \                                               
+    --cluster=eks-sample \
+    --namespace=kube-system \
+    --name=aws-load-balancer-controller \
+    --attach-policy-arn=arn:aws:iam::337179847826:policy/AWSLoadBalancerControllerIAMPolicy \
+    --override-existing-serviceaccounts \
+    --region us-east-2 \
+    --approve
+```
+--> Proceed to install AWS Load Balancer Controller
+```
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update eks
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set region=us-east-2 \
+  --set vpcId=vpc-6597970d \
+  --set clusterName=eks-sample \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller
+```
+--> Verify the controller is installed
+```
+kubectl get deployment -n kube-system aws-load-balancer-controller
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+aws-load-balancer-controller   2/2     2            2           108s  
+```
+--> Check log if error
+```
+kubectl logs -n kube-system deployment/aws-load-balancer-controller
+```
+--> Check if ingressclass exist after install
+```
+kubectl get ingressclass
+NAME   CONTROLLER            PARAMETERS   AGE
+alb    ingress.k8s.aws/alb   <none>       2m12s
+```
+--> Tag the subnets with key - value kubernetes.io/role/elb - 1 as specified in https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html
+```
+aws ec2 create-tags \
+  --resources subnet-4d5d9401 subnet-e1624989 subnet-b91677c3 \
+  --tags Key=kubernetes.io/role/elb,Value=1
+```
+--> Apply the extra-service.yml and extra-ingress.yml
+```
+kubectl apply -f extra-service.yml
+kubectl apply -f extra-ingress.yml
+```
+--> Check the ingress
+```
+kubectl get ingress ingress-extra
+
+NAME            CLASS   HOSTS   ADDRESS                                                                 PORTS   AGE
+ingress-extra   alb     *       k8s-default-ingresse-f6fb7a7f07-810521609.us-east-2.elb.amazonaws.com   80      119s
+```
+--> Curl or access the address to check the result
+```
+➜  ~ curl http://k8s-default-ingresse-f6fb7a7f07-810521609.us-east-2.elb.amazonaws.com
+Fundamentals of DevOps!
+```
+--> We can see the type "Application" on the Load Balancers page (ALB)
+--> To remove AWS LBC
+```
+helm uninstall aws-load-balancer-controller -n kube-system
+```
+![k8s-alb](k8s-alb-extra.png "Title")
+3. Try terminating one of the worker node instances using the AWS Console. How does the ELB handle it? What about EKS?
+--> Observation via JMeter, we can see request 504 and 503
+--> The ELB detects the terminated node’s unhealthy targets (via health checks) and stops routing traffic to pods on that node. As the terminated node’s pods were part of a Deployment, Kubernetes reschedules them on other healthy nodes. The ELB automatically detects the new pods and adds them to the target group.
+--> Kubernetes treats the terminated node as "unreachable" and evicts its pods after a default 5-minute timeout (--pod-eviction-timeout). Pods are rescheduled on other available nodes if they are part of a Deployment/ReplicaSet.
