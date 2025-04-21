@@ -175,3 +175,6 @@ helm uninstall aws-load-balancer-controller -n kube-system
 --> Observation via JMeter, we can see request 504 and 503
 --> The ELB detects the terminated node’s unhealthy targets (via health checks) and stops routing traffic to pods on that node. As the terminated node’s pods were part of a Deployment, Kubernetes reschedules them on other healthy nodes. The ELB automatically detects the new pods and adds them to the target group.
 --> Kubernetes treats the terminated node as "unreachable" and evicts its pods after a default 5-minute timeout (--pod-eviction-timeout). Pods are rescheduled on other available nodes if they are part of a Deployment/ReplicaSet.
+### Serverless Orchestration
+To avoid introducing too many new tools, this blog post uses OpenTofu to deploy Lambda functions, which works great for functions used for background jobs, event processing, and simple web apps, but I don’t recommend it for more complicated web apps (with many functions and HTTP endpoints), as the code can become verbose, and there’s no easy way to test it locally (especially the HTTP portion). For serverless web apps, you may want to instead try out tools like the Serverless Framework or SAM (full list).
+--> https://www.serverless.com/framework/docs/getting-started
