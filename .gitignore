@@ -1,1 +1,8 @@
-.DS_Store
+*.tfstate*
+.terraform
+.terraform.lock.hcl
+*.iml
+*.idea
+*.DS_Store
+*.key
+*.zip
