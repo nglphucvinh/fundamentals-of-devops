@@ -1,6 +1,8 @@
 package test
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
@@ -9,28 +11,59 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLambdaModule(t *testing.T) {
+// TestLambdaEndpoints validates that both the root and health endpoints work
+func TestLambdaEndpoints(t *testing.T) {
 	// Arrange
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: "../",
-		// Or use override values only for existing variables if needed
-		// Vars: map[string]interface{}{
-		// 	"name": "lambda-test",
-		// },
 	})
 
 	// Act - Deploy infrastructure
 	defer terraform.Destroy(t, terraformOptions)
 	terraform.InitAndApply(t, terraformOptions)
 
-	// Assert - Verify function URL works
+	// Get the function URL from the outputs
 	functionUrl := terraform.Output(t, terraformOptions, "function_url")
 
-	// Wait for function to be available
-	time.Sleep(10 * time.Second)
+	// Wait for function to be fully deployed and available
+	time.Sleep(15 * time.Second)
 
-	// Test the endpoint
-	response, err := http.Get(functionUrl)
-	assert.NoError(t, err)
-	assert.Equal(t, 200, response.StatusCode)
+	// Assert - Test root endpoint
+	t.Run("Root Endpoint", func(t *testing.T) {
+		response, err := http.Get(functionUrl)
+		assert.NoError(t, err)
+		assert.Equal(t, 200, response.StatusCode)
+
+		body, err := ioutil.ReadAll(response.Body)
+		assert.NoError(t, err)
+
+		// Verify the response contains expected text
+		assert.Equal(t, "Hello, World!", string(body))
+	})
+
+	// Test health endpoint
+	t.Run("Health Endpoint", func(t *testing.T) {
+		healthUrl := functionUrl
+		if healthUrl[len(healthUrl)-1:] != "/" {
+			healthUrl += "/health"
+		} else {
+			healthUrl += "health"
+		}
+
+		response, err := http.Get(healthUrl)
+		assert.NoError(t, err)
+		assert.Equal(t, 200, response.StatusCode)
+
+		body, err := ioutil.ReadAll(response.Body)
+		assert.NoError(t, err)
+
+		var result map[string]interface{}
+		err = json.Unmarshal(body, &result)
+		assert.NoError(t, err)
+
+		// Verify the response contains expected fields
+		assert.Contains(t, result, "status")
+		assert.Equal(t, "healthy", result["status"])
+		assert.Contains(t, result, "timestamp")
+	})
 }

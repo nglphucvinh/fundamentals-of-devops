@@ -25,3 +25,5 @@ go mod tidy
 go test -v -timeout 30m
 ```
 4. Add a new endpoint in your lambda module and add a new automated test to validate the endpoint works as expected.
+--> Update index.js to add endpoint health
+--> Update lambda_test.go to perform the automated test.
