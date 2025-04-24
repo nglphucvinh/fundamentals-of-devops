@@ -1,0 +1,26 @@
+{
+  "name": "sample-app",
+  "version": "0.0.1",
+  "description": "Sample app for 'Fundamentals of DevOps and Software Delivery'",
+  "main": "app.js",
+  "scripts": {
+    "start": "node server.js",
+    "dockerize": "./build-docker-image.sh",
+    "test": "jest --verbose --coverage",
+    "test:performance": "jest app.performance.test.js",
+    "test:security": "jest app.security.test.js",
+    "lint": "eslint app.js server.js"
+  },
+  "author": "Vinh Nguyen",
+  "license": "MIT",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.25.1",
+    "eslint-plugin-node": "^11.1.0",
+    "jest": "^29.7.0",
+    "supertest": "^7.1.0"
+  }
+}
