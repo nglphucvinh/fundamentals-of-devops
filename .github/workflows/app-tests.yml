@@ -4,14 +4,22 @@ on: push
 
 jobs:                                     
   sample_app_tests:                       
-    name: "Run Tests Using Jest"
+    name: "Run Tests Using Jest, ESLint and Prettier"
     runs-on: ubuntu-latest                
     steps:
-      - uses: actions/checkout@v2         
+      - uses: actions/checkout@v3         
 
       - name: Install dependencies        
         working-directory: ch5/sample-app
         run: npm install
+
+      - name: Run ESLint
+        working-directory: ch5/sample-app
+        run: npm run lint
+
+      - name: Run Prettier
+        working-directory: ch5/sample-app
+        run: npm run format:check 
 
       - name: Run tests                   
         working-directory: ch5/sample-app
