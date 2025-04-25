@@ -20,7 +20,7 @@ describe('Security Tests', () => {
     const response = await request(app).get(`/name/${specialChars}`);
     expect(response.statusCode).toBe(200);
   });
-  
+
   test('Should handle non-existent routes', async () => {
     const response = await request(app).get('/nonexistent');
     expect(response.statusCode).toBe(404);
