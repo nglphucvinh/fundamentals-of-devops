@@ -1,0 +1,19 @@
+# Build outputs
+dist/
+build/
+coverage/
+
+# Dependencies
+node_modules/
+
+# Package files
+package-lock.json
+yarn.lock
+
+# Generated files
+*.min.js
+*.bundle.js
+
+# Other files to ignore
+.cache/
+.git/

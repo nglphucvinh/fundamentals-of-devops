@@ -1,13 +1,13 @@
 const request = require('supertest');
-const app = require('./app');                             
+const app = require('./app');
 const maliciousUrl = '/name/%3Cscript%3Ealert("hi")%3C%2Fscript%3E';
-const sanitizedHtml = 'Hello, &lt;script&gt;alert(&#34;hi&#34;)&lt;/script&gt;!'
+const sanitizedHtml = 'Hello, &lt;script&gt;alert(&#34;hi&#34;)&lt;/script&gt;!';
 
-describe('Test the app', () => {                          
-  test('Get / should return Hello, World!', async () => { 
-    const response = await request(app).get('/');         
-    expect(response.statusCode).toBe(200);                
-    expect(response.text).toBe('Hello, World!');          
+describe('Test the app', () => {
+  test('Get / should return Hello, World!', async () => {
+    const response = await request(app).get('/');
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toBe('Fundamentals of DevOps!');
   });
 
   test('Get /name/Bob should return Hello, Bob!', async () => {
@@ -22,8 +22,3 @@ describe('Test the app', () => {
     expect(response.text).toBe(sanitizedHtml);
   });
 });
-
-
-
-
-
