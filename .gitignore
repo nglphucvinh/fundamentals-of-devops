@@ -6,3 +6,4 @@
 *.DS_Store
 *.key
 *.zip
+node_modules
