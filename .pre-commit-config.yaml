@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: tofu-fmt
+        name: OpenTofu fmt
+        description: Rewrites all OpenTofu configuration files to a canonical format
+        entry: bash -c 'cd ch5/tofu/live/lambda-sample && tofu fmt -recursive'
+        language: system
+        pass_filenames: false
+        files: '^ch5/tofu/live/lambda-sample/.*\.tf'
+        
+      - id: tofu-validate
+        name: OpenTofu validate
+        description: Validates the OpenTofu files
+        entry: bash -c 'cd ch5/tofu/live/lambda-sample && tofu init -backend=false -input=false && tofu validate'
+        language: system
+        pass_filenames: false
+        files: '^ch5/tofu/live/lambda-sample/.*\.tf'
