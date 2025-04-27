@@ -6,7 +6,7 @@ run "validate" {
   command = apply
 
   module {       
-    source  = "../../modules/test-endpoint"
+    source  = "../../../../ch4/tofu/modules/test-endpoint"
   }
 
   variables {    
