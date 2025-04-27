@@ -13,7 +13,7 @@ exports.handler = (event, context, callback) => {
     // Original endpoint behavior
     callback(null, {
       statusCode: 200, 
-      body: "Hello, World!"
+      body: "Fundamentals of DevOps!"
     });
   }
 };
