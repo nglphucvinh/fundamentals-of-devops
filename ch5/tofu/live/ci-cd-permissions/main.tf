@@ -13,7 +13,11 @@ module "iam_roles" {
   name              = "lambda-sample"                           
   oidc_provider_arn = module.oidc_provider.oidc_provider_arn    
 
-  enable_iam_role_for_testing = true                            
+  enable_iam_role_for_testing = true          
+
+  enable_iam_role_for_plan  = true  # Add for GitHub Action deployment                             
+  enable_iam_role_for_apply = true  # Add for GitHub Action deployment
+
   github_repo      = "nglphucvinh/fundamentals-of-devops" 
   lambda_base_name = "lambda-sample"                            
 }
