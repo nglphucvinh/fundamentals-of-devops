@@ -1,24 +1,24 @@
-run "deploy" {   
+run "deploy" {
   command = apply
 }
 
-run "validate" { 
+run "validate" {
   command = apply
 
-  module {       
-    source  = "../../../../ch4/tofu/modules/test-endpoint"
+  module {
+    source = "../../../../ch4/tofu/modules/test-endpoint"
   }
 
-  variables {    
+  variables {
     endpoint = run.deploy.function_url
   }
 
-  assert {       
+  assert {
     condition     = data.http.test_endpoint.status_code == 200
     error_message = "Unexpected status: ${data.http.test_endpoint.status_code}"
   }
 
-  assert {       
+  assert {
     condition     = data.http.test_endpoint.response_body == "Hello, World!"
     error_message = "Unexpected body: ${data.http.test_endpoint.response_body}"
   }
