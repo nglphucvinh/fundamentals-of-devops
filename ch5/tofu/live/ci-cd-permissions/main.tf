@@ -20,4 +20,7 @@ module "iam_roles" {
 
   github_repo      = "nglphucvinh/fundamentals-of-devops" 
   lambda_base_name = "lambda-sample"                            
+
+  tofu_state_bucket         = "vnguyen-fundamentals-of-devops-tofu-state" 
+  tofu_state_dynamodb_table = "vnguyen-fundamentals-of-devops-tofu-state" 
 }
