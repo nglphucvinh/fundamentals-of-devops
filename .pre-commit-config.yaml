@@ -12,7 +12,7 @@ repos:
       - id: tofu-validate
         name: OpenTofu validate
         description: Validates the OpenTofu files
-        entry: bash -c 'cd ch5/tofu/live/lambda-sample && tofu init -backend=false -input=false && tofu validate'
+        entry: bash -c 'export AWS_PROFILE=personal-mgmt-admin && cd ch5/tofu/live/lambda-sample && tofu init -backend=false -input=false && tofu validate'
         language: system
         pass_filenames: false
         files: '^ch5/tofu/live/lambda-sample/.*\.tf'
