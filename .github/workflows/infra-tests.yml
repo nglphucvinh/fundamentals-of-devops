@@ -17,7 +17,17 @@ jobs:
           role-session-name: tests-${{ github.run_number }}-${{ github.actor }} 
           aws-region: us-east-2
 
-      - uses: opentofu/setup-opentofu@v1                                        
+      - uses: opentofu/setup-opentofu@v1                                     
+      
+      - name: Format OpenTofu code
+        working-directory: ch5/tofu/live/lambda-sample
+        run: tofu fmt -check -recursive
+    
+      - name: Validate OpenTofu code
+        working-directory: ch5/tofu/live/lambda-sample
+        run: |
+          tofu init -backend=false -input=false
+          tofu validate
 
       - name: Tofu Test
         env:
